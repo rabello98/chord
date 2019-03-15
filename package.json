@@ -1,0 +1,24 @@
+{
+  "name": "chord",
+  "version": "1.0.0",
+  "description": "framework root to chord-app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rabello98/chord.git"
+  },
+  "keywords": [
+    "chord",
+    "chord-framework",
+    "chord-spa"
+  ],
+  "author": "Nathan Rabelo Valentim",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rabello98/chord/issues"
+  },
+  "homepage": "https://github.com/rabello98/chord#readme"
+}
