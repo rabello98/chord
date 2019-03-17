@@ -2,14 +2,19 @@
   "name": "chord",
   "version": "1.0.0",
   "description": "framework root to chord-app",
-  "main": "index.js",
+  "main": "dist/chord.js",
   "scripts": {
+    "build": "rollup --config",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rabello98/chord.git"
   },
+  "files": [
+    "src/*.js",
+    "dist/*.js"
+  ],
   "keywords": [
     "chord",
     "chord-framework",
