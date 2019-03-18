@@ -1,6 +1,6 @@
 {
-  "name": "chord",
-  "version": "1.0.0",
+  "name": "chord-framework",
+  "version": "1.0.1",
   "description": "framework root to chord-app",
   "main": "dist/chord.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "url": "git+https://github.com/rabello98/chord.git"
   },
   "files": [
-    "src/*.js",
+    "src/*",
     "dist/*.js"
   ],
   "keywords": [
