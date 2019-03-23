@@ -1,4 +1,4 @@
-import chord from '../chord/chord'
+import history from './history/history'
 
 export default {
     routes: [],
@@ -8,6 +8,7 @@ export default {
     },
 
     go (route) {
-        chord.render(route.view, route.module)
-    }
+        $chord.runLifeCicle(route.module, route.view)
+        history.navigate(route)
+    },
 }
