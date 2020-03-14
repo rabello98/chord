@@ -2,13 +2,24 @@ import history from './history/history'
 
 export default {
     routes: [],
-
-    init (routes) {
-        this.routes = routes
+    
+    loadApp () {
+        history.loadUrl()
     },
 
-    go (route) {
-        $chord.runLifeCicle(route.module, route.view)
-        history.navigate(route)
+    init (options) {
+        if (options.routes && typeof options.routes === typeof Array()) {
+            this.routes = options.routes
+            history._routes = Object.values(this.routes)
+        } else $chord.error('the configured router is not valid: it must be a valid routes configured.')
+        
+        if(options.historyMode) 
+            history.historyMode = true
+
+        history.initConfig()
+    },
+
+    go (options) {
+        history.navigate(options)
     },
 }

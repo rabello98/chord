@@ -10,17 +10,11 @@ export default {
     },
 
     init (router, containerElement) {
-        window.onpopstate = function (event) {
-            // 
-        }
-
         containerElement && typeof containerElement === typeof "" && containerElement.includes('#')
         ? this._containerElement = containerElement
         : this.error(`you must pass a valid string to configure the application. The string must contain a valid id ('#element')`)
-
-        router && typeof router === typeof Object() && router.routes && typeof router.routes === typeof Object() 
-        ? this.runLifeCicle(router.routes.main.module, router.routes.main.view) 
-        : this.error('the configured router is not valid: it must be a Chord routes object and have valid routes configured.')
+        
+        router.loadApp()
     },
 
     _mapProperties (currentModule) {
@@ -31,7 +25,7 @@ export default {
         if (this._currentModuleProperties.length) {
             this._currentModuleProperties.forEach(propertie => {
                 delete window[propertie]
-            });
+            })
             this._currentModuleProperties = {}
         }
     },
