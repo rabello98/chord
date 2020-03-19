@@ -53,11 +53,17 @@
                     
                 };
 
+                var getDefaultRoute = () => {
+                    return this._routes.filter(route => {
+                        return route.path == '/'
+                    })[0]
+                };
+
                 if (options.path == '/') {
                     if (this._currUrl.hash) {
                         var fragments = this._currUrl.hash.replace('#', '').split('/').filter(el => el);
                         return getRoute(fragments)
-                    }
+                    } else return getDefaultRoute()
                 }
 
                 var fragments = this._currUrl.pathname.split('/').filter(el => el);
