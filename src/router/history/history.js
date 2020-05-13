@@ -4,6 +4,9 @@ export default {
     _routes: [],
     _currUrl: new Object(),
     baseUrl: 'http://localhost:8000/',
+    msgRequiredParams: 'This route has required parameters',
+    msgParamNotFound: 'The route does not have the specified parameter: ',
+    regexRouterParams: new RegExp('[(:)]', 'g'),
 
     initConfig () {
         if (!this.historyMode) {
@@ -29,6 +32,7 @@ export default {
         if (options.path) {
             var getRoute = (fragments) => {
                 var routes2find = this._routes
+                
                 fragments.forEach(fragment => {
                     var found = []
                     routes2find.forEach(route => { 
@@ -38,10 +42,29 @@ export default {
                     if (found.length)
                         routes2find = found
                 })
-
+                
                 var route = Object.assign({}, ...routes2find)
                 if (Object.keys(route).length) {
-                    route.path = this._currUrl.hash ? this._currUrl.hash.replace('#', '') : this._currUrl.pathname
+                    var realPath = this._currUrl.hash ? this._currUrl.hash.replace('#', '') : this._currUrl.pathname
+                    var params2Return = []
+                    
+                    let paramsRoute = this.getRouteParams(route.path)
+                    if (paramsRoute.length) {
+                        var fragments = realPath.split('/')
+                        paramsRoute.forEach(paramRoute => {
+                            let currentFragment = fragments[paramRoute.idx]
+                            if(currentFragment) {
+                                let param = {}
+                                param[paramRoute.name] = currentFragment
+                                params2Return.push(param)
+                            } else {
+                                if(paramRoute.isRequired)
+                                    $chord.error(this.msgParamNotFound + paramRoute.name)
+                            }
+                        })
+                    }
+                    route.params = Object.assign({}, ...params2Return)
+                    route.path = realPath
                     return route
                 } else return null
                 
@@ -56,7 +79,9 @@ export default {
             if (options.path == '/') {
                 if (this._currUrl.hash) {
                     var fragments = this._currUrl.hash.replace('#', '').split('/').filter(el => el)
-                    return getRoute(fragments)
+                    if (fragments.length) {
+                        return getRoute(fragments)
+                    } else  return getDefaultRoute()
                 } else return getDefaultRoute()
             }
 
@@ -65,47 +90,59 @@ export default {
         }
     },
 
+    getRouteParams (path) {
+        let fgts = path.split('/')
+
+        let paramsRoute = []
+        fgts.forEach((fgt, index) => {
+            if (this.containsRequiredParams(fgt)) {
+                paramsRoute.push({ idx: index, name: fgt.replace(this.regexRouterParams, ''), isRequired: true })
+            } else if (this.containsOptionalParams(fgt)){
+                paramsRoute.push({ idx: index, name: fgt.replace(this.regexRouterParams, ''), isRequired: false })
+            }
+        })
+
+        return paramsRoute
+    },
+
+    containsOptionalParams (path) {
+        return path.includes('(') && path.includes(':') && path.includes(')')
+    },
+
+    containsRequiredParams (path) {
+        return path.includes(':') && !path.includes('(') && !path.includes(')')
+    },
+
     getRouteByName (options) {
         if (options.name) {
             var route = Object.assign({}, this._routes.filter(route => {
                 return route.name == options.name
             })[0])
-
-            // optional params
-            if (route.path.includes('(')
-                && route.path.includes(':')
-                && route.path.includes(')')) {
-
-                if (options.params) {
-                    var paramsKey = Object.keys(options.params)
-                    
-                    paramsKey.forEach(key => {
-                        if (route.path.includes(key)) {
-                            route.path = route.path.replace(key, options.params[key])
-                            route.path = route.path.replace(/[(:)]/g, '')
+            
+            var paramsRoute = this.getRouteParams(route.path)
+            
+            if (paramsRoute.length) {
+                paramsRoute.forEach(param => {
+                    if (options.params) {
+                        if (options.params[param.name]) {
+                            route.path = route.path.replace(param.name, options.params[param.name])
                         } else {
-                            route.path = route.path.replace(/\(.*\)/, '')
+                            if (param.isRequired) {
+                                $chord.error(this.msgParamNotFound + param.name)
+                            } else {
+                                route.path = route.path.replace(param.name, '')
+                            }
                         }
-                    })
-                } else route.path = route.path.replace(/\(.*\)/, '')
-            }
+                    } else {
+                        if (param.isRequired) {
+                            $chord.error(this.msgParamNotFound + param.name)
+                        } else {
+                            route.path = route.path.replace(param.name, '')
+                        }
+                    }
+                })
 
-            // required params
-            if (route.path.includes(':')
-                && !route.path.includes('(')
-                && !route.path.includes(')')) {
-
-                if (options.params) {
-                    var paramsKey = Object.keys(options.params)
-                    
-                    paramsKey.forEach(key => {
-                        if (route.path.includes(key)) {
-                            var paramName = 
-                            route.path = route.path.replace(key, options.params[key])
-                            route.path = route.path.replace(':', '')
-                        } else throw new Erro('Deu ruim no parametro da rota viado')
-                    })
-                } else throw new Error('Deu ruim na rota viado')
+                route.path = route.path.replace(this.regexRouterParams, '')
             }
 
             return route
@@ -127,11 +164,12 @@ export default {
     navigate (options) {
         var route = this.getRouteByName(options)
         this._currUrl = new URL(this.baseUrl + route.path)
+        route.params = options.params ? options.params : null
         this._executeNavigate(route)
     },
 
     _executeNavigate (route) {
-        $chord.runLifeCicle(route.module, route.view)
+        $chord.runLifeCicle(route.module, route.view, route.params)
         this._history.pushState({}, route.name, this.historyMode ? route.path : this.baseUrl + route.path)   
     }
 }
