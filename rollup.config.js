@@ -1,9 +1,11 @@
+require('dotenv').config();
+
 export default [
     {
         input: 'src/chord/chord.js',
         output: {
             name: 'chord.bundle',
-            file: 'dist/chord.js',
+            file: process.env.CHORD_DEV_PATH ? process.env.CHORD_DEV_PATH : 'dist/chord.js',
             format: 'umd'
         }
     },
@@ -11,7 +13,7 @@ export default [
         input: 'src/router/router.js',
         output: {
             name: 'router.bundle',
-            file: 'dist/router.js',
+            file: process.env.ROUTE_DEV_PATH ? process.env.ROUTE_DEV_PATH : 'dist/router.js',
             format: 'umd'
         }
     }

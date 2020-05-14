@@ -70,24 +70,24 @@
             
         },
 
-        runLifeCicle (curentModule, currentView) {
+        runLifeCicle (curentModule, currentView, params) {
             this._beforeRemove();
             this.runLifeCicleComponentMethod(curentModule.beforeRemove);
             this._dismountModule();
             this._afterRemove();
             this.runLifeCicleComponentMethod(curentModule.afterRemove);
             this._renderModule(curentModule);
-            this._beforeCreate();
-            this.runLifeCicleComponentMethod(curentModule.beforeCreate);
+            this._beforeCreate(params);
+            this.runLifeCicleComponentMethod(curentModule.beforeCreate, params);
             this._renderView(currentView);
             this._afterCreate();
             this.runLifeCicleComponentMethod(curentModule.afterCreate);
         },
 
-        runLifeCicleComponentMethod (method) {
+        runLifeCicleComponentMethod (method, params) {
             if (method) {
                 method && typeof method == typeof Function 
-                ? method() 
+                ? method(params) 
                 : this.error('It is necessary that each Life Cycle method be a function');
             }
         },
