@@ -39,10 +39,16 @@ export default {
                         if (route.path.includes(fragment)) found.push(route) 
                     })
 
-                    if (found.length)
+                    if (found.length) {
                         routes2find = found
+                    } else {
+                        routes2find = []
+                    }
                 })
                 
+                if (routes2find.length != 1) 
+                    return this.getRouteByName({ name: 'pageNotFound'})
+
                 var route = Object.assign({}, ...routes2find)
                 if (Object.keys(route).length) {
                     var realPath = this._currUrl.hash ? this._currUrl.hash.replace('#', '') : this._currUrl.pathname
@@ -66,7 +72,7 @@ export default {
                     route.params = Object.assign({}, ...params2Return)
                     route.path = realPath
                     return route
-                } else return null
+                } else return this.getRouteByName({ name: 'pageNotFound'})
                 
             }
 
@@ -115,9 +121,13 @@ export default {
 
     getRouteByName (options) {
         if (options.name) {
-            var route = Object.assign({}, this._routes.filter(route => {
+            var route = {}
+            route = Object.assign({}, this._routes.filter(route => {
                 return route.name == options.name
             })[0])
+            
+            if (!Object.keys(route).length)
+                route = this.getRouteByName({ name: 'pageNotFound'})
             
             var paramsRoute = this.getRouteParams(route.path)
             
