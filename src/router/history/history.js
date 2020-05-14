@@ -3,7 +3,7 @@ export default {
     historyMode: false,
     _routes: [],
     _currUrl: new Object(),
-    baseUrl: 'http://localhost:8000/',
+    baseUrl: process.env.BASE_URL,
     msgRequiredParams: 'This route has required parameters',
     msgParamNotFound: 'The route does not have the specified parameter: ',
     regexRouterParams: new RegExp('[(:)]', 'g'),
