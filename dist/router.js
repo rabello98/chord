@@ -15,7 +15,6 @@
         regexRouterParams: new RegExp('[(:)]', 'g'),
 
         initConfig () {
-            debugger
             if (!this.historyMode) {
                 window.addEventListener('hashchange', () =>  {
                     this.loadUrl();
