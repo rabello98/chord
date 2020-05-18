@@ -6,8 +6,9 @@
 
     var chord = {
         globalModules: {},
-        _currentModuleProperties: [],
         _containerElement: '',
+        _currentModule: {},
+        _transitionTime: 250,
 
         initGlobalModules (modules) {
             modules && typeof modules === typeof Object()
@@ -23,65 +24,70 @@
             router.loadApp();
         },
 
-        _mapProperties (currentModule) {
-            this._currentModuleProperties = Object.keys(currentModule.component);
-        },
-
         _unMapProperties () {
-            if (this._currentModuleProperties.length) {
-                this._currentModuleProperties.forEach(propertie => {
+            let props2Remove = Object.keys(this._currentModule.component);
+            if (props2Remove.length) {
+                props2Remove.forEach(propertie => {
                     delete window[propertie];
                 });
-                this._currentModuleProperties = {};
             }
         },
 
         _beforeCreate () {
-            
+
         },
 
         _afterCreate () {
-            
+            setTimeout(()=>{
+                $(this._containerElement).addClass('show');
+            }, this._transitionTime);
         },
 
-        _renderModule (currentModule) {
-            if (currentModule.hasOwnProperty('component') 
-            && typeof currentModule.component === typeof Object()) {
-                Object.assign(window, currentModule.component);
-                this._mapProperties(currentModule);
+        _renderModule (newModule) {
+            if (newModule.hasOwnProperty('component') 
+            && typeof newModule.component === typeof Object()) {
+                Object.assign(window, newModule.component);
+                this._currentModule = newModule;
             } else {
                 this.error(`the component must contain its properties in a 'component' object`);
             }
         },
 
-        _renderView (currentView) {
-            $(this._containerElement).html(currentView);
+        _renderView (newView) {
+            setTimeout(()=>{
+                $(this._containerElement).html(newView);
+            }, this._transitionTime);
         },
 
         _beforeRemove () {
-            
+            $(this._containerElement).removeClass('show');
         },
 
         _dismountModule () {
             this._unMapProperties();
+            setTimeout(()=>{
+                $(this._containerElement).html('');
+            }, this._transitionTime);
         },
 
         _afterRemove () {
             
         },
 
-        runLifeCicle (curentModule, currentView, params) {
-            this._beforeRemove();
-            this.runLifeCicleComponentMethod(curentModule.beforeRemove);
-            this._dismountModule();
-            this._afterRemove();
-            this.runLifeCicleComponentMethod(curentModule.afterRemove);
-            this._renderModule(curentModule);
+        runLifeCicle (newModule, newView, params) {
+            if (Object.keys(this._currentModule).length) {
+                this._beforeRemove();
+                this.runLifeCicleComponentMethod(this._currentModule.beforeRemove);
+                this._dismountModule();
+                this._afterRemove();
+                this.runLifeCicleComponentMethod(this._currentModule.afterRemove);
+            }
+            this._renderModule(newModule);
             this._beforeCreate(params);
-            this.runLifeCicleComponentMethod(curentModule.beforeCreate, params);
-            this._renderView(currentView);
+            this.runLifeCicleComponentMethod(newModule.beforeCreate, params);
+            this._renderView(newView);
             this._afterCreate();
-            this.runLifeCicleComponentMethod(curentModule.afterCreate);
+            this.runLifeCicleComponentMethod(newModule.afterCreate);
         },
 
         runLifeCicleComponentMethod (method, params) {
