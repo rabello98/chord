@@ -33,7 +33,7 @@ export default {
             var getRoute = (fragments) => {
                 var routes2find = this._routes
                 
-                fragments.forEach(fragment => {
+                for (let fragment of fragments) {
                     var found = []
                     routes2find.forEach(route => { 
                         if (route.path.includes(fragment)) found.push(route) 
@@ -41,10 +41,12 @@ export default {
 
                     if (found.length) {
                         routes2find = found
+                        if (found.length == 1)
+                            break
                     } else {
                         routes2find = []
                     }
-                })
+                }
                 
                 if (routes2find.length != 1) 
                     return this.getRouteByName({ name: 'pageNotFound'})
