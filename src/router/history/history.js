@@ -6,11 +6,15 @@ export default {
     baseUrl: process.env.BASE_URL,
     msgRequiredParams: 'This route has required parameters',
     msgParamNotFound: 'The route does not have the specified parameter: ',
+    msgRequiredSlash: `It is necessary to add '/' to the end of baseUrl`,
     regexRouterParams: new RegExp('[(:)]', 'g'),
     _publicPath: process.env.PUBLIC_PATH,
     _endpointRouteFragment: '/',
 
     initConfig () {
+        if (!this.baseUrl.endsWith(this._endpointRouteFragment)) 
+            $chord.error(this.msgRequiredSlash);
+
         if (!this.historyMode) {
             window.addEventListener('hashchange', () =>  {
                 this.loadUrl()
