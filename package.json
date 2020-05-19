@@ -1,6 +1,6 @@
 {
   "name": "chord-framework",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "framework root to chord-app",
   "main": "dist/chord.js",
   "scripts": {
@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/rabello98/chord/issues"
   },
-  "homepage": "https://github.com/rabello98/chord#readme"
+  "homepage": "https://github.com/rabello98/chord#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  }
 }

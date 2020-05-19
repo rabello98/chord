@@ -7,6 +7,8 @@ export default {
     msgRequiredParams: 'This route has required parameters',
     msgParamNotFound: 'The route does not have the specified parameter: ',
     regexRouterParams: new RegExp('[(:)]', 'g'),
+    _publicPath: process.env.PUBLIC_PATH,
+    _endpointRouteFragment: '/',
 
     initConfig () {
         if (!this.historyMode) {
@@ -24,11 +26,16 @@ export default {
     },
 
     loadUrl () {
-        this._currUrl = new URL(window.location.href)
+        var url = this._publicPath != this._endpointRouteFragment ? window.location.href.replace(this._publicPath, '') : window.location.href
+        this._currUrl = new URL(url)
         this._executeNavigate(this.getRouteByPath({ path: this._currUrl.pathname }))
     },
 
     getRouteByPath (options) {
+        if (this._publicPath != this._endpointRouteFragment) {
+            options.path = options.path.replace(this._publicPath, '')
+        }
+
         if (options.path) {
             var getRoute = (fragments) => {
                 var routes2find = this._routes
@@ -58,7 +65,7 @@ export default {
                     
                     let paramsRoute = this.getRouteParams(route.path)
                     if (paramsRoute.length) {
-                        var fragments = realPath.split('/')
+                        var fragments = realPath.split(this._endpointRouteFragment)
                         paramsRoute.forEach(paramRoute => {
                             let currentFragment = fragments[paramRoute.idx]
                             if(currentFragment) {
@@ -73,6 +80,10 @@ export default {
                     }
                     route.params = Object.assign({}, ...params2Return)
                     route.path = realPath
+
+                    if (this.historyMode)
+                        route.path = this._publicPath + route.path
+
                     return route
                 } else return this.getRouteByName({ name: 'pageNotFound'})
                 
@@ -80,26 +91,30 @@ export default {
 
             var getDefaultRoute = () => {
                 return this._routes.filter(route => {
-                    return route.path == '/'
+                    if (route.path == this._endpointRouteFragment) {
+                        if (this.historyMode)
+                            route.path = this._publicPath
+
+                        return route
+                    }
                 })[0]
             }
 
-            if (options.path == '/') {
+            if (options.path == this._endpointRouteFragment) {
                 if (this._currUrl.hash) {
-                    var fragments = this._currUrl.hash.replace('#', '').split('/').filter(el => el)
+                    var fragments = this._currUrl.hash.replace('#', '').split(this._endpointRouteFragment).filter(el => el)
                     if (fragments.length) {
                         return getRoute(fragments)
                     } else  return getDefaultRoute()
                 } else return getDefaultRoute()
             }
-
-            var fragments = this._currUrl.pathname.split('/').filter(el => el)
+            var fragments = this._currUrl.pathname.split(this._endpointRouteFragment).filter(el => el)
             return getRoute(fragments)
         }
     },
 
     getRouteParams (path) {
-        let fgts = path.split('/')
+        let fgts = path.split(this._endpointRouteFragment)
 
         let paramsRoute = []
         fgts.forEach((fgt, index) => {
@@ -156,6 +171,9 @@ export default {
 
                 route.path = route.path.replace(this.regexRouterParams, '')
             }
+
+            if (this.historyMode)
+                route.path = this._publicPath + route.path
 
             return route
         } 
