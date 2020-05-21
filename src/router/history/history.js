@@ -85,7 +85,7 @@ export default {
                     route.params = Object.assign({}, ...params2Return)
                     route.path = realPath
 
-                    if (this.historyMode)
+                    if (this.historyMode && this._publicPath != this._endpointRouteFragment)
                         route.path = this._publicPath + route.path
 
                     return route
@@ -176,7 +176,7 @@ export default {
                 route.path = route.path.replace(this.regexRouterParams, '')
             }
 
-            if (this.historyMode)
+            if (this.historyMode && this._publicPath != this._endpointRouteFragment)
                 route.path = this._publicPath + route.path
 
             return route
